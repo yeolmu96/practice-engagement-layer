@@ -56,6 +56,7 @@ public class MypageController {
         return ResponseEntity.ok("수정 완료");
     }
 
+    //마이페이지 삭제
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteMyPage(@RequestParam String email){
         MyPageUser user = myPageUserRepository.findByEmail(email)
