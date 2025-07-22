@@ -30,6 +30,10 @@ public class UserInfoRequestService {
             return "test@example.com";
         }
 
+        if("test1".equals(userToken)){
+            return "test1@example.com";
+        }
+
         //실제 서비스용
         //Django API(email 응답)
         String url = djangoBaseUrl + "/account/request-email";

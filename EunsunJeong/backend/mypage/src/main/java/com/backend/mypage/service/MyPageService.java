@@ -18,7 +18,7 @@ public class MyPageService {
 
     public MyPageProfile initializeMypage(String userToken){
         String email = userInfoRequestService.getEmailFromUserToken(userToken);
-        if(email==null){
+        if(email == null){
             throw new UnauthorizedException("유효하지 않은 토큰입니다.");
         }
 
