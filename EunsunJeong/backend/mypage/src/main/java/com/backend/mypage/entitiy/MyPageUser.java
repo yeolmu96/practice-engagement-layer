@@ -27,7 +27,7 @@ public class MyPageUser {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // → 생성자에서 createdAt을 따로 설정하지 않아도,
-    //   save() 하기 직전에 @PrePersist가 자동 실행되어 createdAt 설정됨
+    //   save() 하기 직전에 @ㅁㅋPrePersist가 자동 실행되어 createdAt 설정됨
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
