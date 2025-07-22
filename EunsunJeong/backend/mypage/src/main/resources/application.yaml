@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: mypage
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/av_db?serverTimezone=Asia/Seoul&useSSL=false&characterEncoding=utf8mb4&allowPublicKeyRetrieval=true
+    username: eddi
+    password: eddi@123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      #?? ? none ?? ??
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: eddi@123
+
+#Django API ?? ??
+external:
+  django:
+    base-url: http://localhost:8000
+
+#?? (???/??/aws/...)
+
+#feign:
+#  hystrix:
+#    enabled: false
+#  httpclient:
+#    enabled: true
+#  jackson:
+#    enabled: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web.client.RestTemplate: DEBUG
+    com.yourpackage.client: DEBUG
