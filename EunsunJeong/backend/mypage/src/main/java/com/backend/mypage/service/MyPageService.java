@@ -1,5 +1,7 @@
 package com.backend.mypage.service;
 
+import com.backend.mypage.controller.request_form.MyPageProfileRequest;
+import com.backend.mypage.controller.response_form.MyPageProfileResponse;
 import com.backend.mypage.entitiy.MyPageProfile;
 import com.backend.mypage.entitiy.MyPageUser;
 import com.backend.mypage.exception.UnauthorizedException;
@@ -34,5 +36,33 @@ public class MyPageService {
                     newMypage.setUser(user);
                     return myPageProfileRepository.save(newMypage);
                 });
+    }
+
+    public MyPageProfileResponse getMyPageByEmail(String email){
+        MyPageProfile profile = findProfileByEmail(email);
+        return MyPageProfileResponse.from(profile);
+    }
+
+    public void updateMyPage(String email, MyPageProfileRequest request){
+        MyPageProfile profile = findProfileByEmail(email);
+        profile.setSomeInfo(request.getSomeInfo());
+        myPageProfileRepository.save(profile);
+    }
+
+    public void deleteMyPage(String email){
+        MyPageProfile profile = findProfileByEmail(email);
+        myPageProfileRepository.delete(profile);
+    }
+
+    //공통 유틸 메소드
+    private MyPageUser findUserByEmail(String email){
+        return myPageUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    }
+
+    private MyPageProfile findProfileByEmail(String email){
+        MyPageUser user = findUserByEmail(email);
+        return myPageProfileRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("마이페이지가 존재하지 않습니다."));
     }
 }
