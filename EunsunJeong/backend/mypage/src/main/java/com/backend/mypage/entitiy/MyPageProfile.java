@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+/*
+마이페이지 정보
+ */
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor

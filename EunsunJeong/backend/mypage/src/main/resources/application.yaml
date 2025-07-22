@@ -3,15 +3,14 @@ spring:
     name: mypage
 
   datasource:
-    url: jdbc:mysql://localhost:3306/av_db?serverTimezone=Asia/Seoul&useSSL=false&characterEncoding=utf8mb4&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/av_db?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
     username: eddi
     password: eddi@123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      #?? ? none ?? ??
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:

@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface MyPageRepository extends JpaRepository<MyPageProfile, Long> {
+public interface MyPageProfileRepository extends JpaRepository<MyPageProfile, Long> {
     Optional<MyPageProfile> findByUser(MyPageUser user);
 }
