@@ -7,17 +7,20 @@ import com.backend.mypage.entitiy.MyPageUser;
 import com.backend.mypage.exception.UnauthorizedException;
 import com.backend.mypage.repository.MyPageProfileRepository;
 import com.backend.mypage.repository.MyPageUserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MyPageService {
 
     private final UserInfoRequestService userInfoRequestService;
     private final MyPageUserRepository myPageUserRepository;
     private final MyPageProfileRepository myPageProfileRepository;
 
+    //생성
     public MyPageProfile initializeMypage(String userToken){
         String email = userInfoRequestService.getEmailFromUserToken(userToken);
         if(email == null){
@@ -38,17 +41,21 @@ public class MyPageService {
                 });
     }
 
+    //조회
     public MyPageProfileResponse getMyPageByEmail(String email){
         MyPageProfile profile = findProfileByEmail(email);
         return MyPageProfileResponse.from(profile);
     }
 
+    //수정
     public void updateMyPage(String email, MyPageProfileRequest request){
         MyPageProfile profile = findProfileByEmail(email);
         profile.setSomeInfo(request.getSomeInfo());
+        //필요 시 추가 필드 업데이트
         myPageProfileRepository.save(profile);
     }
 
+    //삭제
     public void deleteMyPage(String email){
         MyPageProfile profile = findProfileByEmail(email);
         myPageProfileRepository.delete(profile);
