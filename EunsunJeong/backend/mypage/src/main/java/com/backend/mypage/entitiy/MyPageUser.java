@@ -23,6 +23,12 @@ public class MyPageUser {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Enumerated(EnumType.STRING)
+    private LoginType loginType;
+
+    @Enumerated(EnumType.STRING)
+    private RoleType roleType;
+
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -61,5 +67,21 @@ public class MyPageUser {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LoginType getLoginType() {
+        return loginType;
+    }
+
+    public void setLoginType(LoginType loginType) {
+        this.loginType = loginType;
+    }
+
+    public RoleType getRoleType() {
+        return roleType;
+    }
+
+    public void setRoleType(RoleType roleType) {
+        this.roleType = roleType;
     }
 }

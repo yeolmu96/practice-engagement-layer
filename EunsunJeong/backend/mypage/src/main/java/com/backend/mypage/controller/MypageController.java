@@ -27,7 +27,7 @@ public class MypageController {
     }
 
     //마이페이지 조회
-    @GetMapping("/get")
+    @GetMapping("/info")
     public ResponseEntity<MyPageProfileResponse> getMyPage(@RequestHeader("Authorization") String token){
         String email = extractEmailFromToken(token);
         return ResponseEntity.ok(myPageService.getMyPageByEmail(email));
