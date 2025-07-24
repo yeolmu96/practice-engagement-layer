@@ -1,56 +1,37 @@
 package com.backend.account.entity;
 
+import com.backend.account.entity.AccountLoginType;
+import com.backend.account.entity.AccountRoleType;
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "account")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+@ToString
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 32, nullable = false)
+    @Column(length = 32, nullable = false, unique = true)
     private String email;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_type_id", nullable = false)
     private AccountRoleType roleType;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "login_type_id", nullable = false)
     private AccountLoginType loginType;
 
-    // 기본 생성자
-    protected Account() {}
-
-    // 생성자
-    public Account(String email, AccountRoleType roleType, AccountLoginType loginType) {
+    public Account(String email, AccountRoleType roleType, AccountLoginType loginTypeEntity) {
         this.email = email;
         this.roleType = roleType;
-        this.loginType = loginType;
-    }
-
-    // Getter
-    public Long getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public AccountRoleType getRoleType() {
-        return roleType;
-    }
-
-    public AccountLoginType getLoginType() {
-        return loginType;
-    }
-
-    // toString
-    @Override
-    public String toString() {
-        return "Account(id=" + id + ", email=" + email + ", roleType=" + roleType + ", loginType=" + loginType + ")";
+        this.loginType = loginTypeEntity;
     }
 }

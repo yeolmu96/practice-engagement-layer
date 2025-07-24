@@ -1,15 +1,15 @@
 package com.backend.account.controller;
 
 import com.backend.account.controller.request_form.UserTokenRequestFrom;
+import com.backend.account.controller.response_form.ApiResponse;
 import com.backend.account.service.AccountService;
-import com.backend.userdashboard.redis_cache.RedisCacheService;
+import com.backend.redis_cache.RedisCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -20,98 +20,66 @@ public class AccountController {
     private final AccountService accountService;
     private final RedisCacheService redisCacheService;
 
+    /** 사용자 이메일 요청 */
     @PostMapping("/email")
     public ResponseEntity<?> requestEmail(@RequestBody UserTokenRequestFrom request) {
-        String userToken = request.getUserToken();
+        return withAccountId(request.getUserToken(), accountId -> {
+            String email = accountService.findEmail(accountId);
+            return (email != null)
+                    ? ApiResponse.ok("email", email)
+                    : ApiResponse.fail("이메일을 찾을 수 없습니다", 404);
+        });
+    }
 
-        if (userToken == null || userToken.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", "userToken이 필요합니다",
-                    "success", false
+    /** 사용자 탈퇴 요청 */
+    @PostMapping("/withdraw")
+    public ResponseEntity<?> requestWithdraw(@RequestBody UserTokenRequestFrom request) {
+        return withAccountId(request.getUserToken(), accountId -> {
+            accountService.createWithdrawalAccount(accountId.toString());
+
+            LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+            accountService.createWithdrawAt(accountId, now);
+            accountService.createWithdrawEnd(accountId, now);
+
+            boolean success = accountService.withdraw(accountId);
+            if (!success) return ApiResponse.fail("회원 탈퇴에 실패했습니다");
+
+            redisCacheService.deleteByKey(request.getUserToken());
+            redisCacheService.deleteByKey(accountId.toString());
+
+            return ApiResponse.ok(Map.of(
+                    "accountId", accountId,
+                    "withdraw_at", now,
+                    "withdraw_end", now.plusYears(3)
             ));
+        });
+    }
+
+    /** 공통 accountId 처리 핸들러 */
+    private ResponseEntity<?> withAccountId(String token, TokenHandler handler) {
+        if (token == null || token.isBlank()) {
+            return ApiResponse.fail("userToken이 필요합니다");
         }
 
         try {
-            String accountId = redisCacheService.getValueByKey(userToken, String.class);
+            Long accountId = redisCacheService.getValueByKey(token, Long.class);
             if (accountId == null) {
-                return ResponseEntity.status(404).body(Map.of(
-                        "error", "유효한 userToken이 아닙니다",
-                        "success", false
-                ));
+                return ApiResponse.fail("유효한 userToken이 아닙니다", 404);
             }
+            return handler.handle(accountId);
 
-            String email = accountService.findEmail(Long.parseLong(accountId));
-            if (email == null) {
-                return ResponseEntity.status(404).body(Map.of(
-                        "error", "이메일을 찾을 수 없습니다",
-                        "success", false
-                ));
-            }
-
-            return ResponseEntity.ok(Map.of(
-                    "email", email,
-                    "success", true
-            ));
+        } catch (NumberFormatException e) {
+            return ApiResponse.fail("accountId 형식 오류", 400);
+        } catch (IllegalArgumentException e) {
+            return ApiResponse.fail("지원되지 않는 Redis 타입", 500);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body(Map.of(
-                    "error", "서버 내부 오류",
-                    "success", false
-            ));
+            return ApiResponse.fail("서버 내부 오류", 500);
         }
     }
 
-    @PostMapping("/withdraw")
-    public ResponseEntity<?> requestWithdraw(@RequestBody UserTokenRequestFrom request) {
-        String userToken = request.getUserToken();
-
-        if (userToken == null || userToken.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", "userToken이 필요합니다",
-                    "success", false
-            ));
-        }
-
-        try {
-            String accountId = redisCacheService.getValueByKey(userToken, String.class);
-            if (accountId == null) {
-                return ResponseEntity.status(404).body(Map.of(
-                        "error", "유효한 userToken이 아닙니다",
-                        "success", false
-                ));
-            }
-
-            accountService.createWithdrawalAccount(accountId);
-
-            LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-            accountService.createWithdrawAt(Long.parseLong(accountId), now);
-            accountService.createWithdrawEnd(Long.parseLong(accountId), now);
-
-            boolean success = accountService.withdraw(Long.parseLong(accountId));
-            if (!success) {
-                return ResponseEntity.badRequest().body(Map.of(
-                        "error", "회원 탈퇴에 실패했습니다",
-                        "success", false
-                ));
-            }
-
-            redisCacheService.deleteByKey(userToken);
-            redisCacheService.deleteByKey(accountId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("accountId", accountId);
-            response.put("withdraw_at", now);
-            response.put("withdraw_end", now.plusYears(3));
-            response.put("success", true);
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(Map.of(
-                    "error", "서버 내부 오류",
-                    "success", false
-            ));
-        }
+    @FunctionalInterface
+    private interface TokenHandler {
+        ResponseEntity<?> handle(Long accountId);
     }
 }

@@ -2,7 +2,7 @@ package com.backend.account_profile.controller;
 
 import com.backend.account_profile.controller.response_form.AccountProfileResponseForm;
 import com.backend.account_profile.service.AccountProfileService;
-import com.backend.userdashboard.redis_cache.RedisCacheService;
+import com.backend.redis_cache.RedisCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

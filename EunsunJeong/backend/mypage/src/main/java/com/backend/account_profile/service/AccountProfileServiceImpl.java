@@ -1,7 +1,7 @@
 package com.backend.account_profile.service;
 
 import com.backend.account.entity.Account;
-import com.backend.account.repository.CustomAccountRepository;
+import com.backend.account.repository.AccountCustomRepository;
 import com.backend.account_profile.entity.AccountProfile;
 import com.backend.account_profile.entity.AdminProfile;
 import com.backend.account_profile.repository.AccountProfileRepository;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class AccountProfileServiceImpl implements AccountProfileService {
 
     private final AccountProfileRepository accountProfileRepository;
-    private final CustomAccountRepository accountRepository;
+    private final AccountCustomRepository accountRepository;
 
     @Override
     public boolean createAccountProfile(Long accountId, String nickname, String gender, String birthyear, String ageRange) {
