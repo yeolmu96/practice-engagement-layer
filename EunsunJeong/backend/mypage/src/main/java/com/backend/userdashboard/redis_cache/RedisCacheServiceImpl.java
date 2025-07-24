@@ -1,4 +1,4 @@
-package com.backend.mypage.redis_cache;
+package com.backend.userdashboard.redis_cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,11 +39,15 @@ public class RedisCacheServiceImpl implements RedisCacheService {
         }
 
         if(clazz == String.class) {
-            return clazz.cast(Long.valueOf(value));
+            return clazz.cast(value);
         }
 
         if(clazz == Integer.class) {
             return clazz.cast(Integer.valueOf(value));
+        }
+
+        if(clazz == Long.class) {
+            return clazz.cast(Long.valueOf(value));
         }
 
         throw new IllegalArgumentException("Unsupported class: " + clazz);
