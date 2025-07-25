@@ -4,13 +4,12 @@ import com.backend.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
-@Table(name = "admin_profile")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
+@Table(name = "admin_profile")
 public class AdminProfile {
 
     @Id
@@ -23,4 +22,8 @@ public class AdminProfile {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false, unique = true)
     private Account account;
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
 }

@@ -1,9 +1,13 @@
 package com.backend.account.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "account_role_type")
+@Getter
+@ToString
 public class AccountRoleType {
 
     @Id
@@ -18,18 +22,5 @@ public class AccountRoleType {
 
     public AccountRoleType(RoleType roleType) {
         this.roleType = roleType;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public RoleType getRoleType() {
-        return roleType;
-    }
-
-    @Override
-    public String toString() {
-        return roleType != null ? roleType.name() : "null";
     }
 }

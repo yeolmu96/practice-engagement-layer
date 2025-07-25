@@ -1,8 +1,10 @@
 package com.backend.account_profile.service;
 
+import com.backend.account_profile.service.request.AccountProfileRequest;
+
 public interface AccountProfileService {
 
-    boolean createAccountProfile(Long accountId, String nickname, String gender, String birthyear, String ageRange);
+    boolean createAccountProfile(Long accountId, AccountProfileRequest request);
 
     boolean createAdminProfile(Long accountId, String email);
 
@@ -16,5 +18,5 @@ public interface AccountProfileService {
 
     String findBirthyear(Long accountId);
 
-    boolean updateAccountProfileIfExists(Long accountId, String nickname, String gender, String birthyear, String ageRange);
+    boolean updateAccountProfileIfExists(Long accountId, AccountProfileRequest request);
 }

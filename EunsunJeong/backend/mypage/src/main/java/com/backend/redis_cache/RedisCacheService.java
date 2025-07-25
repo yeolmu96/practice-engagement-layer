@@ -1,4 +1,4 @@
-package com.backend.userdashboard.redis_cache;
+package com.backend.redis_cache;
 
 import java.time.Duration;
 
