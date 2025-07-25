@@ -25,7 +25,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void createGuestAccount(String email, String loginType) {
-        createAccount(email, loginType); // 동일 로직 위임
+        createAccount(email, loginType);
     }
 
     @Override
@@ -46,40 +46,43 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void createWithdrawalAccount(Long accountId) {
+    public void createWithdrawAccount(String accountId) {
         WithdrawalMembership membership = new WithdrawalMembership(accountId, null, null);
         withdrawalRepository.save(membership);
     }
 
     @Override
-    public void createWithdrawAt(Long accountId, LocalDateTime time) {
-        updateWithdrawInfo(accountId, time, false);
-    }
-
-    @Override
-    public void createWithdrawEnd(Long accountId, LocalDateTime time) {
-        updateWithdrawInfo(accountId, time, true);
-    }
-
-    private void updateWithdrawInfo(Long accountId, LocalDateTime time, boolean isEnd) {
+    public void createWithdrawAt(String accountId, LocalDateTime time) {
         withdrawalRepository.findByAccountId(accountId)
                 .ifPresent(wm -> {
-                    if (isEnd) {
-                        wm.setWithdrawEnd(time.plusYears(3));
-                    } else {
-                        wm.setWithdrawAt(time);
-                    }
-                    // JPA dirty checking
+                    wm.setWithdrawAt(time);
+                    withdrawalRepository.save(wm);
                 });
     }
 
     @Override
-    public boolean withdraw(Long accountId) {
-        return accountCustomRepository.deleteAccount(accountId);
+    public void createWithdrawEnd(String accountId, LocalDateTime time) {
+        withdrawalRepository.findByAccountId(accountId)
+                .ifPresent(wm -> {
+                    wm.setWithdrawEnd(time.plusYears(3));
+                    withdrawalRepository.save(wm);
+                });
     }
 
     @Override
-    public long countEmail(String guestEmail) {
-        return accountJpaRepository.countByEmailStartingWith(guestEmail);
+    public boolean withdraw(String accountIdStr) {
+        return accountCustomRepository.deleteAccount(accountIdStr);
+    }
+
+    //게스트 계정 자동 생성 시 사용
+    /*
+    guest_1@example.com
+    guest_2@example.com
+    ...
+    guest_N@example.com
+     */
+    @Override
+    public long countEmail(String guestEmailPrefix) {
+        return accountJpaRepository.countByEmailStartingWith(guestEmailPrefix);
     }
 }

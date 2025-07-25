@@ -6,12 +6,21 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Repository
 @Transactional
 public class AccountCustomRepositoryImpl implements AccountCustomRepository {
 
     @PersistenceContext
     private EntityManager em;
+
+    private final WithdrawalMembershipRepository withdrawalMembershipRepository;
+
+    public AccountCustomRepositoryImpl(WithdrawalMembershipRepository withdrawalMembershipRepository) {
+        this.withdrawalMembershipRepository = withdrawalMembershipRepository;
+    }
 
     @Override
     public void save(String email, String loginTypeStr) {
@@ -60,12 +69,45 @@ public class AccountCustomRepositoryImpl implements AccountCustomRepository {
     }
 
     @Override
-    public boolean deleteAccount(Long accountId) {
-        Account account = em.find(Account.class, accountId);
-        if (account != null) {
-            em.remove(account);
-            return true;
+    public boolean deleteAccount(String accountIdStr) {
+        try {
+            Long accountId = Long.parseLong(accountIdStr);
+            Account account = em.find(Account.class, accountId);
+            if (account != null) {
+                em.remove(account);
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid accountId: " + accountIdStr);
         }
         return false;
+    }
+
+
+    // 1. 탈퇴 정보 저장
+    public WithdrawalMembership saveWithdrawInfo(String accountId) {
+        WithdrawalMembership withdrawal = new WithdrawalMembership(
+                accountId, null, null
+        );
+        em.persist(withdrawal);
+        return withdrawal;
+    }
+
+    // 2. 탈퇴 시각 저장
+    public void saveWithdrawAt(String accountId, LocalDateTime time) {
+        Optional<WithdrawalMembership> optional = withdrawalMembershipRepository.findByAccountId(accountId);
+        optional.ifPresent(wm -> {
+            wm.setWithdrawAt(time);
+            withdrawalMembershipRepository.save(wm);
+        });
+    }
+
+    // 3. 탈퇴 만료일 저장
+    public void saveWithdrawEnd(String accountId, LocalDateTime time) {
+        Optional<WithdrawalMembership> optional = withdrawalMembershipRepository.findByAccountId(accountId);
+        optional.ifPresent(wm -> {
+            wm.setWithdrawEnd(time.plusYears(3));
+            withdrawalMembershipRepository.save(wm);
+        });
     }
 }

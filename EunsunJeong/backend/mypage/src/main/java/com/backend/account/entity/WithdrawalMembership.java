@@ -14,8 +14,8 @@ public class WithdrawalMembership {
     /**
      * Redis에서 가져온 Account ID (실제 Account 엔티티와 FK 연결 안함)
      */
-    @Column(name = "account_id", nullable = false)
-    private Long accountId;
+    @Column(name = "account_id", nullable = false, length = 50)
+    String accountId;
 
     /**
      * 탈퇴 시각
@@ -31,7 +31,7 @@ public class WithdrawalMembership {
 
     protected WithdrawalMembership() {}
 
-    public WithdrawalMembership(Long accountId, LocalDateTime withdrawAt, LocalDateTime withdrawEnd) {
+    public WithdrawalMembership(String accountId, LocalDateTime withdrawAt, LocalDateTime withdrawEnd) {
         this.accountId = accountId;
         this.withdrawAt = withdrawAt;
         this.withdrawEnd = withdrawEnd;

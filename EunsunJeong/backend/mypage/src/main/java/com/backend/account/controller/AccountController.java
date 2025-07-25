@@ -35,17 +35,18 @@ public class AccountController {
     @PostMapping("/withdraw")
     public ResponseEntity<?> requestWithdraw(@RequestBody UserTokenRequestFrom request) {
         return withAccountId(request.getUserToken(), accountId -> {
-            accountService.createWithdrawalAccount(accountId.toString());
-
+            String accountIdStr = accountId.toString();
             LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-            accountService.createWithdrawAt(accountId, now);
-            accountService.createWithdrawEnd(accountId, now);
 
-            boolean success = accountService.withdraw(accountId);
+            accountService.createWithdrawAccount(accountIdStr);
+            accountService.createWithdrawAt(accountIdStr, now);
+            accountService.createWithdrawEnd(accountIdStr, now);
+
+            boolean success = accountService.withdraw(accountIdStr);
             if (!success) return ApiResponse.fail("회원 탈퇴에 실패했습니다");
 
             redisCacheService.deleteByKey(request.getUserToken());
-            redisCacheService.deleteByKey(accountId.toString());
+            redisCacheService.deleteByKey(accountIdStr);
 
             return ApiResponse.ok(Map.of(
                     "accountId", accountId,

@@ -3,7 +3,10 @@ package com.backend.account.repository;
 import com.backend.account.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AccountRepository extends JpaRepository<Account, Long>, AccountCustomRepository {
+import java.util.Optional;
+
+public interface AccountRepository extends JpaRepository<Account, Long> {
     boolean existsByEmail(String email);
     long countByEmailStartingWith(String prefix);
+    Optional<Account> findByEmail(String email);
 }

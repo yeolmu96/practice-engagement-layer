@@ -5,14 +5,22 @@ import java.time.LocalDateTime;
 public interface AccountService {
 
     void createAccount(String email, String loginType);
-    void createAdminAccount(String email, String loginType);
-    void createWithdrawalAccount(String accountId);
-    boolean checkEmailDuplication(String email);
-    String findEmail(Long accountId);
-    void createWithdrawAt(Long accountId, LocalDateTime time);
-    void createWithdrawEnd(Long accountId, LocalDateTime time);
-    boolean withdraw(Long accountId);
-    void createGuestAccount(String guestEmail, String loginType);
-    long countEmail(String guestEmail);
 
+    void createGuestAccount(String email, String loginType);
+
+    void createAdminAccount(String email, String loginType);
+
+    boolean checkEmailDuplication(String email);
+
+    String findEmail(Long accountId);
+
+    void createWithdrawAccount(String accountId);
+
+    void createWithdrawAt(String accountId, LocalDateTime time);
+
+    void createWithdrawEnd(String accountId, LocalDateTime time);
+
+    boolean withdraw(String accountId);
+
+    long countEmail(String guestEmailPrefix);
 }
