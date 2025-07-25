@@ -67,7 +67,7 @@ public class AccountProfileRepositoryImpl implements AccountProfileRepository {
 
     public Optional<String> findRoleType(Long accountId) {
         return findProfile(accountId)
-                .map(profile -> profile.getAccount().getRoleType().name());
+                .map(profile -> profile.getAccount().getRoleType().getRoleEnum().name());
     }
 
     public Optional<String> findNickname(Long accountId) {

@@ -14,13 +14,14 @@ public class AccountRoleType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //컬럼명 건드리지 말기
     @Enumerated(EnumType.STRING)
     @Column(name = "role_type", length = 64, nullable = false)
-    private RoleType roleType;
+    private RoleType roleEnum;
 
     protected AccountRoleType() {}
 
-    public AccountRoleType(RoleType roleType) {
-        this.roleType = roleType;
+    public AccountRoleType(RoleType roleEnum) {
+        this.roleEnum = roleEnum;
     }
 }
