@@ -3,14 +3,14 @@ package com.backend.account_profile.repository;
 import com.backend.account.entity.Account;
 import com.backend.account_profile.entity.AccountProfile;
 import com.backend.account_profile.entity.AdminProfile;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class AccountProfileRepositoryImpl implements AccountProfileRepository {
@@ -18,28 +18,19 @@ public class AccountProfileRepositoryImpl implements AccountProfileRepository {
     private final AccountProfileJpaRepository accountProfileJpaRepository;
     private final AdminProfileJpaRepository adminProfileJpaRepository;
 
-    @PersistenceContext
-    private EntityManager em;
-
     /**
      * AccountProfile 저장
      */
     @Transactional
     public AccountProfile save(Account account, String nickname, String gender, String birthyear, String ageRange) {
-        System.out.println("AccountProfile 저장 시도: " + gender + ", " + birthyear + ", " + ageRange);
+        log.info("AccountProfile 저장 시도: gender={}, birthyear={}, ageRange={}", gender, birthyear, ageRange);
 
-        gender = (gender == null || gender.isBlank()) ? "None" : gender;
-        birthyear = (birthyear == null || birthyear.isBlank()) ? "0000" : birthyear;
-        ageRange = (ageRange == null || ageRange.isBlank()) ? "None" : ageRange;
+        gender = defaultIfBlank(gender, "None");
+        birthyear = defaultIfBlank(birthyear, "0000");
+        ageRange = defaultIfBlank(ageRange, "None");
 
-        String originalNickname = (nickname == null || nickname.isBlank()) ? "temporary" : nickname;
-        String newNickname = originalNickname;
-        int count = 1;
-
-        while (accountProfileJpaRepository.existsByNickname(newNickname)) {
-            newNickname = originalNickname + "_" + count++;
-            System.out.println("Nickname 중복, 새 시도: " + newNickname);
-        }
+        String originalNickname = defaultIfBlank(nickname, "temporary");
+        String newNickname = generateUniqueNickname(originalNickname);
 
         AccountProfile profile = AccountProfile.builder()
                 .account(account)
@@ -70,27 +61,53 @@ public class AccountProfileRepositoryImpl implements AccountProfileRepository {
     }
 
     public Optional<String> findEmail(Long accountId) {
-        return accountProfileJpaRepository.findByAccount_Id(accountId)
+        return findProfile(accountId)
                 .map(profile -> profile.getAccount().getEmail());
     }
 
     public Optional<String> findRoleType(Long accountId) {
-        return accountProfileJpaRepository.findByAccount_Id(accountId)
-                .map(profile -> profile.getAccount().getRoleType().name()); // or getRoleTypeId() if Integer
+        return findProfile(accountId)
+                .map(profile -> profile.getAccount().getRoleType().name());
     }
 
     public Optional<String> findNickname(Long accountId) {
-        return accountProfileJpaRepository.findByAccount_Id(accountId)
+        return findProfile(accountId)
                 .map(AccountProfile::getNickname);
     }
 
     public Optional<String> findGender(Long accountId) {
-        return accountProfileJpaRepository.findByAccount_Id(accountId)
+        return findProfile(accountId)
                 .map(AccountProfile::getGender);
     }
 
     public Optional<String> findBirthyear(Long accountId) {
-        return accountProfileJpaRepository.findByAccount_Id(accountId)
+        return findProfile(accountId)
                 .map(AccountProfile::getBirthyear);
+    }
+
+    // 🔹 내부 유틸 메서드들
+    private Optional<AccountProfile> findProfile(Long accountId) {
+        return accountProfileJpaRepository.findByAccount_Id(accountId);
+    }
+
+    private String defaultIfBlank(String value, String defaultValue) {
+        return (value == null || value.isBlank()) ? defaultValue : value;
+    }
+
+    private String generateUniqueNickname(String baseNickname) {
+        String newNickname = baseNickname;
+        int count = 1;
+
+        while (accountProfileJpaRepository.existsByNickname(newNickname)) {
+            newNickname = baseNickname + "_" + count++;
+            log.warn("Nickname 중복, 새 시도: {}", newNickname);
+        }
+
+        return newNickname;
+    }
+
+    @Override
+    public Optional<AccountProfile> findByAccountId(Long accountId) {
+        return findProfile(accountId);
     }
 }

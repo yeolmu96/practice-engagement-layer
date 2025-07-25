@@ -6,10 +6,8 @@ import lombok.Getter;
 @Getter
 @Builder
 public class AccountProfileResponseForm {
-
     private String email;
     private String nickname;
     private String gender;
-    private Integer birthyear;
-
+    private String birthyear; // ← String으로 통일
 }

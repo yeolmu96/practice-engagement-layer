@@ -3,7 +3,7 @@ package com.backend.account.service;
 import com.backend.account.entity.Account;
 import com.backend.account.entity.WithdrawalMembership;
 import com.backend.account.repository.AccountCustomRepository;
-import com.backend.account.repository.AccountJpaRepository;
+import com.backend.account.repository.AccountRepository;
 import com.backend.account.repository.WithdrawalMembershipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountCustomRepository accountCustomRepository;
-    private final AccountJpaRepository accountJpaRepository;
+    private final AccountRepository accountJpaRepository;
     private final WithdrawalMembershipRepository withdrawalRepository;
 
     @Override

@@ -1,67 +1,63 @@
 package com.backend.account_profile.service;
 
 import com.backend.account.entity.Account;
-import com.backend.account.repository.AccountCustomRepository;
+import com.backend.account.repository.AccountRepository;
 import com.backend.account_profile.entity.AccountProfile;
 import com.backend.account_profile.entity.AdminProfile;
 import com.backend.account_profile.repository.AccountProfileRepository;
+import com.backend.account_profile.service.request.AccountProfileRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountProfileServiceImpl implements AccountProfileService {
 
     private final AccountProfileRepository accountProfileRepository;
-    private final AccountCustomRepository accountRepository;
+    private final AccountRepository accountRepository;
 
     @Override
-    public boolean createAccountProfile(Long accountId, String nickname, String gender, String birthyear, String ageRange) {
-        System.out.println("profile 진입");
-        Optional<Account> optionalAccount = accountRepository.findById(accountId);
-        if (optionalAccount.isEmpty()) {
-            System.out.println("Account 없음");
-            return false;
-        }
-        Account account = optionalAccount.get();
+    public boolean createAccountProfile(Long accountId, AccountProfileRequest request) {
+        log.info("createAccountProfile() 진입");
 
-        String originalNickname = (nickname == null || nickname.isBlank()) ? "temporary" : nickname;
-        String newNickname = originalNickname;
-        int count = 1;
+        Account account = findAccountOrThrow(accountId);
+        accountProfileRepository.save(account, request.getNickname(), request.getGender(),
+                request.getBirthyear(), request.getAgeRange());
 
-        while (true) {
-            try {
-                accountProfileRepository.save(account, newNickname, gender, birthyear, ageRange);
-                break; // 저장 성공
-            } catch (Exception e) {
-                newNickname = originalNickname + "_" + count++;
-                System.out.println("닉네임 중복 발생, 시도: " + newNickname);
-            }
-        }
-
-        System.out.println("Profile 생성 성공");
+        log.info("AccountProfile 생성 성공");
         return true;
     }
 
     @Override
-    public boolean createAdminProfile(Long accountId, String email) {
-        System.out.println("adminProfile 진입");
+    public boolean updateAccountProfileIfExists(Long accountId, AccountProfileRequest request) {
+        Account account = findAccountOrThrow(accountId);
+        Optional<AccountProfile> optionalProfile = accountProfileRepository.findByAccount(account);
 
-        Optional<Account> optionalAccount = accountRepository.findById(accountId);
-        if (optionalAccount.isEmpty()) {
-            System.out.println("Account 없음");
-            return false;
-        }
+        if (optionalProfile.isPresent()) {
+            AccountProfile profile = optionalProfile.get();
+            profile.updateProfile(request.getNickname(), request.getGender(),
+                    request.getBirthyear(), request.getAgeRange());
 
-        AdminProfile saved = accountProfileRepository.saveAdmin(optionalAccount.get(), email);
-        if (saved != null) {
-            System.out.println("AdminProfile 생성 성공: " + saved);
+            log.info("AccountProfile 수정 완료: accountId={}", accountId);
             return true;
+        } else {
+            log.info("AccountProfile 없음 → 신규 생성 시도");
+            return createAccountProfile(accountId, request);
         }
+    }
 
-        return false;
+    @Override
+    public boolean createAdminProfile(Long accountId, String email) {
+        log.info("createAdminProfile() 진입");
+
+        Account account = findAccountOrThrow(accountId);
+        AdminProfile saved = accountProfileRepository.saveAdmin(account, email);
+        log.info("AdminProfile 생성 성공: {}", saved);
+        return true;
     }
 
     @Override
@@ -89,27 +85,9 @@ public class AccountProfileServiceImpl implements AccountProfileService {
         return accountProfileRepository.findBirthyear(accountId).orElse(null);
     }
 
-    @Override
-    public boolean updateAccountProfileIfExists(Long accountId, String nickname, String gender, String birthyear, String ageRange) {
-        Optional<Account> optionalAccount = accountRepository.findById(accountId);
-        if (optionalAccount.isEmpty()) {
-            return false;
-        }
-
-        Account account = optionalAccount.get();
-        Optional<AccountProfile> optionalProfile = accountProfileRepository.findByAccount(account);
-
-        if (optionalProfile.isPresent()) {
-            AccountProfile profile = optionalProfile.get();
-
-            if (nickname != null) profile.setNickname(nickname);
-            if (gender != null) profile.setGender(gender);
-            if (birthyear != null) profile.setBirthyear(birthyear);
-            if (ageRange != null) profile.setAgeRange(ageRange);
-
-            return true;
-        } else {
-            return createAccountProfile(accountId, nickname, gender, birthyear, ageRange);
-        }
+    private Account findAccountOrThrow(Long accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Account: " + accountId));
     }
 }
+
