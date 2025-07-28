@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -48,11 +49,12 @@ public class AccountController {
             redisCacheService.deleteByKey(request.getUserToken());
             redisCacheService.deleteByKey(accountIdStr);
 
-            return ApiResponse.ok(Map.of(
-                    "accountId", accountId,
-                    "withdraw_at", now,
-                    "withdraw_end", now.plusYears(3)
-            ));
+            Map<String, Object> responseMap = new HashMap<>();
+            responseMap.put("accountId", accountId);
+            responseMap.put("withdraw_at", now);
+            responseMap.put("withdraw_end", now.plusYears(3));
+
+            return ApiResponse.ok(responseMap);
         });
     }
 
