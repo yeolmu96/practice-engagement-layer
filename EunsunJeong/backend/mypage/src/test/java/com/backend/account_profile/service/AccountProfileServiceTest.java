@@ -41,9 +41,8 @@ public class AccountProfileServiceTest {
             .id(accountId)
             .email(email)
             .build();
-    private final AccountProfileRequest request = new AccountProfileRequest(
-            "곰돌이, "FEMALE", "1998", "20-29"
-    );
+    private final AccountProfileRequest request =
+            new AccountProfileRequest("곰돌이", "FEMALE", "1998", "20-29");
 
     @Nested
     @DisplayName("createAccountProfile()")
@@ -96,13 +95,19 @@ public class AccountProfileServiceTest {
 
             //then
             assertThat(result).isTrue();
-            verify(accountProfileRepository).save(account, "곰돌이", "FEMALE", "1998", "20-29");
+            verify(accountProfileRepository).save(
+                    eq(account),
+                    eq("곰돌이"),
+                    eq("FEMALE"),
+                    eq("1998"),
+                    eq("20-29")
+            );
         }
     }
 
     @Nested
     @DisplayName("createAdminProfile")
-    class CreateAdminProfile(){
+    class CreateAdminProfile {
 
         @Test
         @DisplayName("성공")
@@ -155,11 +160,9 @@ public class AccountProfileServiceTest {
 
         @Test
         void findBirthyear_success(){
-            when(accountProfileRepository.findBirthyear(accountId)).thenReturn(Optional.of("1990"));
+            when(accountProfileRepository.findBirthyear(accountId)).thenReturn(Optional.of("1998"));
             String birthyear = accountProfileService.findBirthyear(accountId);
-            assertThat(birthyear).isEqualTo("1990");
+            assertThat(birthyear).isEqualTo("1998");
         }
     }
-
-
 }
