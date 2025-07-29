@@ -44,7 +44,7 @@ public class AccountCustomRepositoryImpl implements AccountCustomRepository {
 
     private AccountRoleType findOrCreateRoleType(RoleType roleTypeEnum) {
         return em.createQuery(
-                        "SELECT r FROM AccountRoleType r WHERE r.roleType = :role", AccountRoleType.class)
+                        "SELECT r FROM AccountRoleType r WHERE r.roleEnum = :role", AccountRoleType.class)
                 .setParameter("role", roleTypeEnum)
                 .getResultStream()
                 .findFirst()

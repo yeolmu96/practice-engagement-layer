@@ -1,10 +1,10 @@
-package com.backend.mypage;
+package com.backend.userdashboard;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MypageApplicationTests {
+class UserDashboardApplicationTests {
 
     @Test
     void contextLoads() {
